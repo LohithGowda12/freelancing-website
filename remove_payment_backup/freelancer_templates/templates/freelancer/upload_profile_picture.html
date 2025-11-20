@@ -1,0 +1,40 @@
+{% extends 'freelancer/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Upload Profile Picture</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card p-4 shadow-lg">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_profile_picture" class="form-label">Choose a profile picture</label>
+                        {{ form.as_p }}
+                        <img id="profilePreview" src="#" alt="Profile Preview" class="img-fluid mt-3" style="display:none;">
+                    </div>
+                    <button type="submit" class="btn btn-success btn-block mt-4">Upload</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to preview the selected image
+    document.getElementById('id_profile_picture').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const img = document.getElementById('profilePreview');
+            img.src = e.target.result;
+            img.style.display = 'block'; // Show the image preview
+        };
+        
+        if (file) {
+            reader.readAsDataURL(file); // Convert the file to data URL
+        }
+    });
+</script>
+{% endblock %}
