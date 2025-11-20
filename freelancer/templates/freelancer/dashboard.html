@@ -1,0 +1,482 @@
+{% extends 'freelancer/base.html' %}
+
+{% block title %}Freelancer Dashboard - FreelanceHub{% endblock %}
+
+{% block content %}
+<style>
+
+/* Background for the testimonials section */
+.container.py-5 {
+  background: linear-gradient(to right, #f0f4ff, #dfe9fd); /* Light gradient */
+  border-radius: 15px;
+  padding: 3rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Card Design */
+.card {
+  border: none;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #ffffff; /* White background for card */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-10px); /* Lift effect */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); /* Hover shadow */
+}
+
+/* Image */
+.card img {
+  width: 100px; /* Smaller image size */
+  height: 100px;
+  border: 3px solid #6c63ff; /* Custom border for the image */
+}
+
+/* Title and Subtitle */
+.card-title {
+  font-weight: 600;
+  color: #333333; /* Dark gray for the title */
+}
+
+.text-muted {
+  color: #6c757d;
+}
+
+/* Rating Stars */
+.text-warning {
+  font-size: 1.2rem;
+}
+
+/* Card Text */
+.card-text {
+  font-size: 0.95rem;
+  color: #555555; /* Medium gray for readability */
+}
+
+/* Social Buttons */
+.btn-outline-primary {
+  border: 1px solid #6c63ff;
+  color: #6c63ff;
+}
+
+.btn-outline-primary:hover {
+  background: #6c63ff;
+  color: #ffffff;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .card img {
+    width: 80px;
+    height: 80px;
+  }
+
+  .card {
+    margin-bottom: 1.5rem;
+  }
+}
+.verified-badge {
+  margin-left: 8px;
+  font-size: 1.1rem; /* Adjust size for better visibility */
+}
+.verified-badge .bi {
+  vertical-align: middle;
+}
+
+#about{
+    border-radius: 10px;
+}
+  #about h2 {
+    font-size: 2rem;
+    color: #333;
+  }
+
+  #about p {
+    font-size: 1.1rem;
+  }
+
+  #about ul li {
+    font-size: 1rem;
+  }
+
+  #about img {
+    max-width: 100%;
+    height: auto;
+  }
+  #achievements{
+    border-radius: 10px;
+  }
+  #achievements h2 {
+    font-size: 2rem;
+    color: #333;
+  }
+
+  #achievements .achievement-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  #achievements .achievement-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  #achievements i {
+    font-size: 3rem;
+  }
+</style>
+
+</style>
+
+  </style>
+  
+
+<div class="container">
+    <br>
+    <br>
+    <!-- Banner Section -->
+    <div class="hero-banner" style="background-image: url('https://cdn.pixabay.com/photo/2021/03/02/13/04/laptop-6062423_960_720.jpg'); background-size: cover; background-position: center; padding: 100px 0; text-align: center; color: white; border-radius: 10px;">
+        <div class="container text-light">
+            <h1 class="display-3 text-white">Welcome Back, {{ user }}!</h1>
+            <p class="lead text-white">Explore your opportunities, manage your projects, and grow your career with FreelanceHub</p>
+            <a href="{% url 'freelancer_available_jobs' %}" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-search"></i> Browse Available Jobs
+            </a>
+        </div>
+    </div>
+    <br><br>
+    <!-- Header Section -->
+    <div class="row mb-4 ">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-4 text-center text-white">
+                        <i class="fas fa-user-circle "></i> Hello, {{ user }}!
+                    </h1>
+                    <p class="lead text-white text-center">Welcome back to your freelancer dashboard. Manage your jobs, track payments, and stay up to date with project statuses.</p>
+                </div>
+                <div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats and Card Section -->
+    <div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
+        <!-- Total Earnings -->
+        <div class="col">
+            <div class="card shadow-lg" style="background: linear-gradient(135deg, #00c6ff, #007bff); height: 100%;">
+                <div class="card-body text-white">
+                    <h5 class="card-title">
+                        <i class="fas fa-wallet"></i> Total Earnings
+                    </h5>
+                    <h3>Kshs. {{ freelancer.total_earnings }}</h3>
+                    <p>Total earnings from completed jobs</p>
+                    <a href="{% url 'freelancer_payment_overview' %}" class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-eye"></i> View Payments
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Jobs -->
+        <div class="col">
+            <div class="card shadow-lg" style="background: linear-gradient(135deg, #ffc107, #ff9800); height: 100%;">
+                <div class="card-body text-white">
+                    <h5 class="card-title">
+                        <i class="fas fa-tasks"></i> Active Jobs
+                    </h5>
+                    <h3>{{ freelancer.active_jobs.count }}</h3>
+                    <p>Ongoing projects currently assigned</p>
+                    <a href="{% url 'freelancer_available_jobs' %}" class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-briefcase"></i> View Active Jobs
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Jobs -->
+        <div class="col">
+            <div class="card shadow-lg" style="background: linear-gradient(135deg, #6a11cb, #2575fc); height: 100%;">
+                <div class="card-body text-white">
+                    <h5 class="card-title">
+                        <i class="fas fa-clipboard-list"></i> Available Jobs
+                    </h5>
+                    <h3>{{ available_jobs_count }}</h3>
+                    <p>Browse the latest jobs and start applying</p>
+                    <a href="{% url 'freelancer_available_jobs' %}" class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-search"></i> Browse Jobs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+      {% for job in available_jobs %}
+          <div class="col-md-6 col-lg-4 mb-4">
+              <div class="card h-100">
+                  <div class="card-body">
+                      <h5 class="card-title">
+                          {{ job.title }}
+                          {% if job.is_new %}
+                              <span class="badge bg-success ms-2">New</span>
+                          {% endif %}
+                      </h5>
+                      <p class="card-text"><strong>Category:</strong> {{ job.category }}</p>
+                      <p class="card-text"><strong>Description:</strong> {{ job.description|truncatechars:100 }}</p>
+                      <p class="card-text"><strong>Budget:</strong> Kshs. {{ job.budget }}</p>
+                      <p class="card-text"><strong>Posted:</strong> {{ job.created_at|date:"d M Y" }}</p>
+                      <a href="{% url 'freelancer_job_details' job.id %}" class="btn btn-primary">View Details</a>
+                  </div>
+              </div>
+          </div>
+      {% empty %}
+          <div class="col-12">
+              <div class="alert alert-warning text-center" role="alert">
+                  No jobs are currently available.
+              </div>
+          </div>
+      {% endfor %}
+  </div>
+    <!-- Notifications & Feedback Section -->
+    <div class="row">
+        <!-- Job Notifications -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-lg" style="background: linear-gradient(135deg, #1e90ff, #87cefa);">
+                <div class="card-body text-white">
+                    <h5 class="card-title">
+                        <i class="fas fa-bell"></i> Job Notifications
+                    </h5>
+                    <ul class="list-group list-group-flush">
+                        {% for notification in notifications %}
+                        <li class="list-group-item">
+                            <i class="fas fa-bell text-info"></i> {{ notification.message }}
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">
+                            <i class="fas fa-bell text-info"></i> No new notifications
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{% url 'freelancer_notifications' %}" class="btn btn-outline-light btn-sm mt-3">
+                        <i class="fas fa-envelope"></i> View All Notifications
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-lg" style="background: linear-gradient(135deg, #ff5f6d, #ffc371);">
+                <div class="card-body text-white">
+                    <h5 class="card-title">
+                        <i class="fas fa-comments"></i> Recent Feedback
+                    </h5>
+                    {% for feedback in freelancer.feedbacks %}
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-comment-alt text-danger"></i>
+                        <div class="ms-3">
+                            <p class="mb-0"><strong>{{ feedback.client.name }}:</strong> "{{ feedback.comment }}"</p>
+                            <span class="text-muted">{{ feedback.date }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>No feedback received yet.</p>
+                    {% endfor %}
+                    <a href="{% url 'freelancer_feedback' %}" class="btn btn-outline-light btn-sm mt-3">
+                        <i class="fas fa-comment-dots"></i> View All Feedback
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<br>
+<br>
+<div class="container">
+<!-- About Our Freelancing Platform Section -->
+<section id="about" class="py-5 bg-light">
+    <div class="container">
+      <div class="row align-items-center">
+        <!-- About Text -->
+        <div class="col-md-6">
+          <h2 class="text-uppercase fw-bold">About Our Freelancing Platform</h2>
+          <p class="text-muted mt-3">
+            Our platform connects talented freelancers with clients from around the world. We focus on simplifying project management, improving collaboration, and helping you achieve your goals seamlessly.
+          </p>
+          <ul class="list-unstyled mt-4">
+            <li class="mb-3">
+              <i class="bi bi-check-circle-fill text-primary me-2"></i>
+              Secure and transparent transactions.
+            </li>
+            <li class="mb-3">
+              <i class="bi bi-check-circle-fill text-primary me-2"></i>
+              Advanced project management tools.
+            </li>
+            <li class="mb-3">
+              <i class="bi bi-check-circle-fill text-primary me-2"></i>
+              A global network of skilled professionals.
+            </li>
+          </ul>
+          <a href="#features" class="btn btn-primary mt-3">Learn More</a>
+        </div>
+  
+        <!-- About Image -->
+        <div class="col-md-6 text-center">
+          <img src="https://cdn.pixabay.com/photo/2015/01/21/14/14/apple-606761_960_720.jpg" class="img-fluid rounded shadow" alt="About Our Platform">
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<br>
+<br>
+<br>
+<div class="container">
+<!-- Our Achievements Section -->
+<section id="achievements" class="py-5 bg-white">
+    <div class="container">
+      <!-- Section Title -->
+      <div class="text-center mb-5">
+        <h2 class="text-uppercase fw-bold">Our Achievements</h2>
+        <p class="text-muted">Celebrating milestones that showcase our dedication and success.</p>
+      </div>
+  
+      <!-- Achievements Row -->
+      <div class="row text-center">
+        <!-- Achievement 1 -->
+        <div class="col-md-3">
+          <div class="achievement-card p-4 shadow-sm border rounded">
+            <i class="bi bi-people-fill text-primary display-4 mb-3"></i>
+            <h3 class="fw-bold">10,000+</h3>
+            <p class="text-muted">Registered Freelancers</p>
+          </div>
+        </div>
+  
+        <!-- Achievement 2 -->
+        <div class="col-md-3">
+          <div class="achievement-card p-4 shadow-sm border rounded">
+            <i class="bi bi-briefcase-fill text-success display-4 mb-3"></i>
+            <h3 class="fw-bold">5,000+</h3>
+            <p class="text-muted">Projects Completed</p>
+          </div>
+        </div>
+  
+        <!-- Achievement 3 -->
+        <div class="col-md-3">
+          <div class="achievement-card p-4 shadow-sm border rounded">
+            <i class="bi bi-award-fill text-warning display-4 mb-3"></i>
+            <h3 class="fw-bold">100+</h3>
+            <p class="text-muted">Industry Awards</p>
+          </div>
+        </div>
+  
+        <!-- Achievement 4 -->
+        <div class="col-md-3">
+          <div class="achievement-card p-4 shadow-sm border rounded">
+            <i class="bi bi-globe2 text-danger display-4 mb-3"></i>
+            <h3 class="fw-bold">50+</h3>
+            <p class="text-muted">Countries Served</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+  <br>
+  <br>
+  <br>
+<!-- Testimonials Section -->
+<div class="container py-5">
+    <h2 class="text-center mb-4">What Our Clients Say</h2>
+    <div class="row">
+      <!-- Testimonial 1 -->
+      <div class="col-md-4">
+        <div class="card shadow-sm border-light">
+          <img src="https://cdn.pixabay.com/photo/2020/04/14/10/56/gamer-5041976_640.jpg" class="card-img-top rounded-circle mx-auto d-block mt-4" alt="Client Image">
+          <div class="card-body text-center">
+            <h5 class="card-title">
+              John Doe 
+              <span class="verified-badge" title="Verified Client">
+                <i class="bi bi-patch-check-fill text-primary"></i>
+              </span>
+            </h5>
+            <p class="text-muted">Freelance Web Developer</p>
+            <div class="mb-3">
+              <!-- Rating -->
+              <span class="text-warning">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            </div>
+            <p class="card-text">"Freelancing has been a great experience. I get to work with amazing clients and build exciting projects. The flexibility is priceless!"</p>
+            <!-- Social Icons -->
+            <div>
+              <a href="#" class="btn btn-outline-primary btn-sm m-1"><i class="bi bi-twitter"></i></a>
+              <a href="#" class="btn btn-outline-primary btn-sm m-1"><i class="bi bi-linkedin"></i></a>
+              <a href="#" class="btn btn-outline-primary btn-sm m-1"><i class="bi bi-github"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Testimonial 2 -->
+      <div class="col-md-4">
+        <div class="card shadow-sm border-light">
+          <img src="https://cdn.pixabay.com/photo/2024/10/20/08/29/portrait-9134409_960_720.png" class="card-img-top rounded-circle mx-auto d-block mt-4" alt="Client Image">
+          <div class="card-body text-center">
+            <h5 class="card-title">
+              Jane Smith
+              <span class="verified-badge" title="Verified Client">
+                <i class="bi bi-patch-check-fill text-primary"></i>
+              </span>
+            </h5>
+            <p class="text-muted">Freelance Graphic Designer</p>
+            <div class="mb-3">
+              <!-- Rating -->
+              <span class="text-warning">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            </div>
+            <p class="card-text">"Freelancing allowed me to be creative on my own terms. I love working on diverse projects from clients around the world!"</p>
+            <!-- Social Icons -->
+            <div>
+              <a href="#" class="btn btn-outline-primary btn-sm m-1"><i class="bi bi-twitter"></i></a>
+              <a href="#" class="btn btn-outline-primary btn-sm m-1"><i class="bi bi-linkedin"></i></a>
+              <a href="#" class="btn btn-outline-primary btn-sm m-1"><i class="bi bi-instagram"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Testimonial 3 -->
+      <div class="col-md-4">
+        <div class="card shadow-sm border-light">
+          <img src="https://cdn.pixabay.com/photo/2022/12/07/03/09/ai-generated-7640161_960_720.jpg" class="card-img-top rounded-circle mx-auto d-block mt-4" alt="Client Image">
+          <div class="card-body text-center">
+            <h5 class="card-title">
+              Samuel Lee
+              <span class="verified-badge" title="Verified Client">
+                <i class="bi bi-patch-check-fill text-primary"></i>
+              </span>
+            </h5>
+            <p class="text-muted">Freelance Content Writer</p>
+            <div class="mb-3">
+              <!-- Rating -->
+              <span class="text-warning">&#9733;&#9733;&#9733;&#9733;</span>
+            </div>
+            <p class="card-text">"Being a freelancer has given me the chance to explore various niches and work with fantastic clients across industries!"</p>
+            <!-- Social Icons -->
+            <div>
+              <a href="#" class="btn btn-outline-primary btn-sm m-1"><i class="bi bi-twitter"></i></a>
+              <a href="#" class="btn btn-outline-primary btn-sm m-1"><i class="bi bi-linkedin"></i></a>
+              <a href="#" class="btn btn-outline-primary btn-sm m-1"><i class="bi bi-facebook"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <br>
+  <br>
+
+{% endblock %}

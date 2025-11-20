@@ -1,0 +1,154 @@
+{% extends 'freelancer/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header  text-white">
+            <h2 class="display-4">{{ job.title }}</h2>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title fs-4"><strong>Category:</strong> {{ job.category }}</h5>
+            <p class="card-text fs-5"><strong>Description:</strong> {{ job.description }}</p>
+
+            <!-- Row for Budget, Status, and Deadline Cards -->
+            <div class="row">
+                <!-- Budget Card -->
+                <div class="col-md-4 mb-4">
+                    <div class="card ">
+                        <div class="card-header  ">
+                            <i class="bi bi-cash fs-4"></i> <strong>Budget</strong>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text fs-5">Kshs. {{ job.budget }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Card -->
+                <div class="col-md-4 mb-4">
+                    <div class="card ">
+                        <div class="card-header  ">
+                            <i class="bi bi-flag fs-4"></i> <strong>Status</strong>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text fs-5">
+                                <span class="badge {% if job.status == 'Open' %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ job.status }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <div class="row">
+                <!-- Deadline Card -->
+                <div class="col-md-4 mb-4">
+                    <div class="card ">
+                        <div class="card-header  ">
+                            <i class="bi bi-calendar-check fs-4"></i> <strong>Deadline</strong>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text fs-5">{{ job.deadline|date:"M d, Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+            
+
+<!-- Countdown Card below the row of cards -->
+<div class="col-md-4 mb-4">
+    <div class="card-header   d-flex align-items-center justify-content-between">
+        <i class="bi bi-clock fs-4"></i> <strong>Time Remaining</strong>
+    </div>
+    <div class="card-body">
+        <div class="d-flex justify-content-center">
+            <p class="card-text fs-3 text-danger fw-bold" id="countdown">00:00:00</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        border-radius: 0.375rem 0.375rem 0 0;
+        padding: 1rem;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    #countdown {
+        font-size: 3rem;
+        font-weight: bold;
+        letter-spacing: 2px;
+    }
+</style>
+</div>
+            <!-- Tags Section -->
+            <p class="card-text fs-5"><strong>Tags:</strong>
+                {% for tag in job.tags.all %}
+                    <span class="badge bg-info text-dark">{{ tag.name }}</span>
+                {% empty %}
+                    <span class="text-muted">No tags available.</span>
+                {% endfor %}
+            </p>
+
+            <!-- Progress Bar -->
+            {% if job.max_applicants %}
+            <p class="card-text fs-5"><strong>Applications:</strong> {{ job.current_applicants }} / {{ job.max_applicants }}</p>
+            <div class="progress">
+                <div class="progress-bar bg-success" role="progressbar"
+                    aria-valuenow="{{ job.current_applicants }}" 
+                    aria-valuemin="0" 
+                    aria-valuemax="{{ job.max_applicants }}">
+                    {{ application_percentage|floatformat:2 }}%
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+            <a href="{% url 'freelancer_available_jobs' %}" class="btn btn-lg btn-secondary">
+                Back to Available Jobs
+            </a>
+            {% if job.status == 'Open' %}
+            <a href="{% url 'apply_for_job' job_id=1 %}" class="btn btn-lg btn-success">
+                Apply for Job
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Countdown Timer Script -->
+<script>
+    const deadline = new Date("{{ job.deadline|date:'Y-m-d H:i:s' }}").getTime();
+    const countdown = document.getElementById('countdown');
+    const timer = setInterval(() => {
+        const now = new Date().getTime();
+        const distance = deadline - now;
+
+        if (distance <= 0) {
+            clearInterval(timer);
+            countdown.textContent = "Deadline passed.";
+            countdown.classList.remove('text-danger');
+            countdown.classList.add('text-muted');
+            return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        countdown.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }, 1000);
+</script>
+{% endblock %}
