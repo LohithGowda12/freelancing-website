@@ -1,4 +1,4 @@
-from django.http import HttpResponseForbidden, HttpResponseRedirect
+﻿from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.timezone import now, timedelta
@@ -8,10 +8,10 @@ from .models import Freelancer, Job, Notification, Feedback, Payment, Profile
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate
-from django.contrib.auth import login 
+from django.contrib.auth import login
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
-from .forms import ProfilePictureForm 
+from .forms import ProfilePictureForm
 from django.contrib.auth import logout
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -26,7 +26,7 @@ def index(request):
         return render(request, 'freelancer/index.html')
     else:
         return HttpResponseRedirect(reverse('freelancer_dashboard'))
-     
+
 def register(request):
     if request.method == "POST":
         username = request.POST['username']
@@ -52,10 +52,10 @@ def freelancer_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        
+
         # Authenticate user
         user = authenticate(request, username=username, password=password)
-        
+
         if user is not None:
             # Login the user
             login(request, user)
@@ -64,7 +64,7 @@ def freelancer_login(request):
         else:
             messages.error(request, "Invalid username or password.")
             return redirect('login')  # Stay on login page for retry
-    
+
     return render(request, 'freelancer/login.html')  # Render the login page if GET request
 @login_required
 def freelancer_dashboard(request):
@@ -137,77 +137,29 @@ def freelancer_edit_user(request, user_id):
 
     # Render the edit user template with the user data
     return render(request, 'freelancer/edit_user.html', {'user': user})
-def toggle_freelancer_status(request, user_id):
-    # Fetch the user by ID or return a 404 if not found
-    user = get_object_or_404(User, id=user_id)
-    
-    # Toggle the active status
-    user.is_active = not user.is_active
-    user.save()
-
-    # Add a success message
-    if user.is_active:
-        messages.success(request, f"{user.username}'s account has been activated.")
-    else:
-        messages.success(request, f"{user.username}'s account has been suspended.")
-
-    # Redirect back to the user management page or another relevant page
-    return redirect('index')  # Adjust the URL name as needed
 @login_required
 def freelancer_profile(request):
-    # Fetch the freelancer object
-    freelancer = get_object_or_404(Freelancer, user=request.user)
+    # Minimal freelancer_profile - fetch freelancer or redirect
+    try:
+        freelancer = get_object_or_404(Freelancer, user=request.user)
+    except Exception:
+        # If freelancer profile not found, redirect to index
+        return redirect('index')
 
-    # Fetch jobs (update this based on the actual relationship)
-    jobs = freelancer.jobs.all() if hasattr(freelancer, 'jobs') else None
-
-    context = {
-        'freelancer': freelancer,
-        'jobs': jobs,  # Pass jobs to the template
-    }
-    return render(request, 'freelancer/freelancer_profile.html', context)
-@login_required
-def upload_profile_picture(request):
-    # Ensure profile exists for the user
-    if not hasattr(request.user, 'profile'):
-        Profile.objects.create(user=request.user)
-
-    if request.method == 'POST':
-        form = ProfilePictureForm(request.POST, request.FILES)
-        if form.is_valid():
-            profile = request.user.profile
-            profile.picture = form.cleaned_data['picture']
-            profile.save()
-            messages.success(request, "Profile picture updated successfully!")
-            return redirect('freelancer_profile')
-    else:
-        form = ProfilePictureForm()
-
-    return render(request, 'freelancer/upload_profile_picture.html', {'form': form})
+    # Render freelancer profile page (adjust template/context if your project differs)
+    return render(request, 'freelancer/freelancer_profile.html', {'freelancer': freelancer})
 
 @login_required
 def freelancer_payment_overview(request):
-    # Assuming the logged-in user is associated with a freelancer profile
-    freelancer = get_object_or_404(Freelancer, user=request.user)
-    payments = Payment.objects.filter(freelancer=freelancer).order_by('-date')
-
-    context = {
-        'freelancer': freelancer,
-        'payments': payments,
-    }
-
-    return render(request, 'freelancer/freelancer_payment_overview.html', context)
+    # Payments removed — safe stub so template/url reversing doesn't crash.
+    # If you later re-enable payments, replace this stub with the real logic.
+    return redirect('freelancer_profile')
 
 @login_required
-def freelancer_ongoing_jobs(request):
-    freelancer = get_object_or_404(Freelancer, user=request.user)
-    ongoing_jobs = freelancer.jobs.filter(status='ongoing').order_by('deadline')
-    
-    # Add pagination
-    paginator = Paginator(ongoing_jobs, 5)  # Show 5 jobs per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
+def freelancer_payment_overview(request):
+    # Payments removed — safe stub so template/url reversing doesn't crash.
+    # If you later re-enable payments, replace this stub with the real logic.
+    return redirect('freelancer_profile')
     return render(request, 'freelancer/freelancer_ongoing_jobs.html', {'page_obj': page_obj})
 
 @login_required
@@ -258,10 +210,10 @@ def apply_success(request):
 def freelancer_notifications(request):
     freelancer = get_object_or_404(Freelancer, user=request.user)
     notifications = Notification.objects.filter(freelancer=freelancer).order_by('deadline')
-    
+
     # Mark all notifications as read when visiting this view
     notifications.update(is_read=True)
-    
+
     return render(request, 'freelancer/freelancer_notifications.html', {'notifications': notifications})
 
 
@@ -269,13 +221,13 @@ def freelancer_notifications(request):
 def freelancer_feedback(request):
     freelancer = get_object_or_404(Freelancer, user=request.user)
     feedbacks = freelancer.feedbacks.all().order_by('-date_submitted')
-    
+
     return render(request, 'freelancer/freelancer_feedback.html', {'feedbacks': feedbacks})
 
 
 def freelancer_job_details(request, job_id):
     job = get_object_or_404(JobPosting, id=job_id)
-    
+
     # Calculate the application percentage (if max_applicants is set)
     if job.max_applicants:
         application_percentage = (job.current_applicants / job.max_applicants) * 100
@@ -291,12 +243,12 @@ def freelancer_job_details(request, job_id):
 def freelancer_payment_history(request):
     freelancer = get_object_or_404(Freelancer, user=request.user)
     payments = Payment.objects.filter(freelancer=freelancer).order_by('-payment_date')
-    
+
     # Add pagination
     paginator = Paginator(payments, 5)  # Show 5 payments per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
+
     return render(request, 'freelancer/freelancer_payment_history.html', {'page_obj': page_obj})
 
 
@@ -304,12 +256,12 @@ def freelancer_payment_history(request):
 def freelancer_job_history(request):
     freelancer = get_object_or_404(Freelancer, user=request.user)
     completed_jobs = freelancer.jobs.filter(status='completed').order_by('-completion_date')
-    
+
     # Add pagination
     paginator = Paginator(completed_jobs, 5)  # Show 5 completed jobs per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
+
     return render(request, 'freelancer/freelancer_job_history.html', {'page_obj': page_obj})
 
 # def (request, page):
@@ -336,3 +288,75 @@ def faq(request):
 def logout_view(request):
     logout(request)
     return redirect('index')
+
+
+
+# --- TEMPORARY STUBS ADDED AUTOMATICALLY --- 
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def upload_profile_picture(request):
+    """
+    Temporary stub to keep URL imports working.
+    Restore the real implementation from freelancer/views.py.bak_* later.
+    """
+    from django.contrib import messages
+    from django.shortcuts import redirect
+    messages.info(request, "Upload/profile picture functionality temporarily disabled.")
+    return redirect("freelancer_profile")
+
+@login_required
+def toggle_freelancer_status(request, user_id):
+    """
+    Temporary stub for toggle_freelancer_status (prevents import errors).
+    Replace with real logic from backup when ready.
+    """
+    from django.contrib import messages
+    from django.shortcuts import redirect
+    messages.info(request, "Toggling freelancer status is temporarily disabled.")
+    return redirect("index")
+# --- END TEMPORARY STUBS ---
+
+# --- TEMP STUB ADDED FOR freelancer_ongoing_jobs ---
+
+@login_required
+def freelancer_ongoing_jobs(request):
+    """
+    TEMPORARY STUB: returns a simple redirect so project imports succeed.
+    Replace with real implementation from backups.
+    """
+    from django.shortcuts import redirect
+    from django.contrib import messages
+    messages.info(request, "Freelancer ongoing jobs temporarily disabled.")
+    return redirect("freelancer_profile")
+
+
+# ---- upload_profile_picture stub added by helper 20251121001937
+@login_required
+def upload_profile_picture(request):
+    \"\"\"Simple stub to handle profile picture upload used by templates.
+    Adjust the form/field names if your project uses different names.\"\"\"
+    try:
+        freelancer = get_object_or_404(Freelancer, user=request.user)
+    except Exception:
+        messages.error(request, "Freelancer profile not found.")
+        return redirect('freelancer_profile')
+
+    # If your project already has a ProfilePictureForm or similar, this will use it.
+    # If not, this returns the upload template (template should exist).
+    if request.method == 'POST':
+        form = ProfilePictureForm(request.POST, request.FILES)
+        if form.is_valid():
+            # adjust field name below if different in your form/model
+            profile = getattr(freelancer, 'profile', None)
+            if profile is None:
+                messages.error(request, "No profile object to save picture.")
+                return redirect('freelancer_profile')
+            profile.picture = form.cleaned_data.get('picture')  # change if field has another name
+            profile.save()
+            messages.success(request, "Profile picture updated successfully!")
+            return redirect('freelancer_profile')
+    else:
+        form = ProfilePictureForm()
+
+    return render(request, 'freelancer/upload_profile_picture.html', {'form': form})
